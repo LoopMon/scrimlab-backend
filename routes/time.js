@@ -19,6 +19,29 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET - Buscar um time por ID
+router.get("/:id", async (req, res) => {
+  try {
+    const timeId = req.params.id;
+    const time = await Time.findById(timeId).populate("jogadores");
+
+    if (!time) {
+      return res.status(404).json({ mensagemErro: "Time não encontrado" });
+    }
+
+    res.status(200).json({
+      mensagemSucesso: "Time recuperado com sucesso",
+      time: time,
+    });
+  } catch (err) {
+    res.status(500).json({
+      mensagemErro: "Erro ao buscar o time",
+      erro: err,
+    });
+  }
+});
+
+
 // POST - Criar um novo time
 router.post("/", async (req, res) => {
   const novoTime = new Time({

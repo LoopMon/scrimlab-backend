@@ -19,6 +19,29 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// Rota para obter uma partida por ID
+router.get("/:id", async (req, res, next) => {
+  try {
+    const partidaId = req.params.id;
+    const partida = await Partida.findById(partidaId);
+
+    if (!partida) {
+      return res.status(404).json({ message: "Partida não encontrada" });
+    }
+
+    res.status(200).json({
+      message: "Partida recuperada com sucesso",
+      partida,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      errorTitle: "Erro ao buscar a partida",
+      error: err,
+    });
+  }
+});
+
+
 // Rota para criar uma nova partida
 router.post("/", async (req, res, next) => {
   const { nomeMapa, imgMapa, data, score, idUsuario, times } = req.body;
