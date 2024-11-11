@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 
-const Usuario = require("../models/usuario")
+const Usuario = require("../models/usuarios")
 
 // Rota para login
 // Rota para pegar todos os usuários
