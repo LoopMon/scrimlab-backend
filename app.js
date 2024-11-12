@@ -2,9 +2,11 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const fs = require("fs")
 var path = require("path")
-const Jogador = require("./models/jogadores")
-
 const mongoose = require("mongoose")
+
+const Jogador = require("./models/jogadores")
+const Time = require("./models/times")
+const Usuario = require("./models/usuarios")
 
 const loadData = (filePath) => {
   return JSON.parse(fs.readFileSync(filePath, "utf8"))
@@ -19,6 +21,7 @@ var timeRoutes = require("./routes/time")
 
 const app = express()
 const cors = require("cors")
+const times = require("./models/times")
 
 // Conexão com o MongoDB
 // C:/'Program Files'/MongoDB/Server/8.0/bin/mongod.exe --dbpath
@@ -27,11 +30,43 @@ mongoose
   .then(async () => {
     console.log("Conexão com o MongoDB estabelecida com sucesso.")
 
-    const data = loadData("./mongod_playground/insert_players.json")
+    const dataJogadores = loadData("./mongod_playground/insert_players.json")
+    const dataTimes = loadData("./mongod_playground/insert_teams.json")
 
     try {
-      await Jogador.insertMany([...data])
-      console.log("Dados inseridos com sucesso.")
+      const existeJogador = await Jogador.findOne()
+      const existeTime = await Time.findOne()
+      const existeUsuario = await Usuario.findOne()
+
+      if (!existeJogador) {
+        await Jogador.insertMany([...dataJogadores])
+        console.log("+ Jogadores inseridos com sucesso.")
+      }
+
+      if (!existeTime) {
+        const jogadores = await Jogador.find({})
+        let jogadorIndex = 0
+
+        dataTimes.forEach((time) => {
+          // Buscar os 5 jogadores do time
+          const jogadoresTime = jogadores.slice(jogadorIndex, jogadorIndex + 5)
+          // Pegar o ID dos jogadores
+          const idJogadoresTime = jogadoresTime.map((jogador) => jogador._id)
+          // inserir os 5 jogadores no time
+          time.jogadores = idJogadoresTime
+          jogadorIndex += 5
+        })
+        await times.insertMany(dataTimes)
+        console.log("+ Times inseridos com sucesso.")
+      }
+      if (!existeUsuario) {
+        await Usuario.create({
+          nome: "lucas",
+          email: "lucas@email",
+          senha: "123",
+        })
+        console.log("+ Usuarios inseridos com sucesso.")
+      }
     } catch (error) {
       console.error("Erro ao inserir dados:", error)
     }
