@@ -4,6 +4,10 @@ var debug = require("debug")("node-rest:server")
 
 const http = require("http")
 
+require("dotenv").config()
+
+const serverIP = process.env.SERVER_IP || "localhost"
+
 const normalizePort = (val) => {
   var port = parseInt(val, 10)
 
@@ -51,6 +55,6 @@ app.set("port", port)
 const server = http.createServer(app)
 server.on("error", onError)
 server.on("listening", onListening)
-server.listen(port, "localhost", () => {
-  console.log(`Servidor rodando em http://localhost:${port}`)
+server.listen(port, serverIP, () => {
+  console.log(`Servidor rodando em http://${serverIP}:${port}`)
 })
