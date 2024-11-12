@@ -3,7 +3,6 @@ const router = express.Router()
 
 const Usuario = require("../models/usuarios")
 
-// Rota para login
 // Rota para pegar todos os usuários
 router.get("/", async (req, res) => {
   try {
@@ -21,6 +20,7 @@ router.get("/", async (req, res) => {
   }
 })
 
+// Rota para o login
 router.post("/signin", async (req, res) => {
   const { email, senha } = req.body
   try {
