@@ -41,6 +41,29 @@ router.get("/:id", async (req, res, next) => {
   }
 })
 
+// Rota para obter uma partida pelo nome do mapa
+router.get("/mapa/:nome", async (req, res, next) => {
+  try {
+    const nomeMapa = req.params.nome
+    const partida = await Partida.find({ nomeMapa })
+
+    if (!partida) {
+      return res.status(404).json({ message: "Partida com o mapa especificado não encontrada" })
+    }
+
+    res.status(200).json({
+      message: "Partida recuperada com sucesso",
+      partida,
+    })
+  } catch (err) {
+    return res.status(500).json({
+      errorTitle: "Erro ao buscar a partida",
+      error: err,
+    })
+  }
+})
+
+
 // Rota para criar uma nova partida
 router.post("/", async (req, res, next) => {
   const { nomeMapa, imgMapa, data, score, idUsuario, times } = req.body
@@ -106,5 +129,39 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 */
+
+// Rota para atualizar o score de uma partida pelo ID
+router.patch("/:id", async (req, res, next) => {
+  const { score } = req.body; // Desestruturação para pegar o score do corpo da requisição
+
+  if (!score) {
+    return res.status(400).json({ message: "O score é obrigatório para atualização." });
+  }
+
+  try {
+    const partidaId = req.params.id;
+
+    // Atualiza apenas o campo 'score' da partida
+    const partidaAtualizada = await Partida.findByIdAndUpdate(
+      partidaId,
+      { $set: { score } },  // Atualiza o score
+      { new: true }  // Retorna o documento atualizado
+    );
+
+    if (!partidaAtualizada) {
+      return res.status(404).json({ message: "Partida não encontrada" });
+    }
+
+    res.status(200).json({
+      message: `Partida ${partidaId} atualizada com sucesso`,
+      partidaAtualizada,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Erro ao atualizar a partida",
+      error: err,
+    });
+  }
+});
 
 module.exports = router
