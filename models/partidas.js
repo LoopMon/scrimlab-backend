@@ -7,7 +7,6 @@ const schema = new Schema({
   data: { type: Date },
   score: { type: String },
   idUsuario: { type: Schema.Types.ObjectId, ref: "Usuario", required: true },
-  times: [{ type: Schema.Types.ObjectId, ref: "TimeEmPartida" }],
 })
 
 module.exports = mongoose.model("Partida", schema)
