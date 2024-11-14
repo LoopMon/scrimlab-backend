@@ -7,8 +7,15 @@ const TimeEmPartida = require("../models/timesEmPartidas")
 router.get("/", async (req, res) => {
   try {
     const timesEmPartida = await TimeEmPartida.find({})
-      .populate("idTime")
+      .populate({
+        path: "idTime",
+        populate: {
+          path: "jogadores",
+          model: "Jogador",
+        },
+      })
       .populate("idPartida")
+
     res.status(200).json({
       mensagemSucesso: "Times em partidas recuperados com sucesso",
       timesEmPartida: timesEmPartida,
@@ -21,13 +28,45 @@ router.get("/", async (req, res) => {
   }
 })
 
+router.get("/:id", async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const partida = await TimeEmPartida.findById(id)
+      .populate({
+        path: "idTime",
+        populate: {
+          path: "jogadores", // Popula os jogadores dentro do idTime
+          model: "Jogador",
+        },
+      })
+      .populate("idPartida")
+
+    if (!partida) {
+      return res.status(404).json({
+        mensagemErro: "Partida não encontrada",
+      })
+    }
+
+    res.status(200).json({
+      mensagemSucesso: "Partida recuperada com sucesso",
+      partida: partida,
+    })
+  } catch (err) {
+    res.status(500).json({
+      mensagemErro: "Erro ao buscar a partida",
+      erro: err,
+    })
+  }
+})
+
 // POST - Criar um novo time em partida
 router.post("/", async (req, res) => {
   const novoTimeEmPartida = new TimeEmPartida({
     idPartida: req.body.idPartida,
-    idTime: req.body.idTime, // array de IDs dos times
+    idTime: req.body.idTime,
     time: req.body.time,
-    estatisticaJogador: req.body.estatisticaJogador, // array de estatísticas dos jogadores
+    estatisticaJogador: req.body.estatisticaJogador,
   })
 
   try {
@@ -52,9 +91,9 @@ router.patch("/:id", async (req, res) => {
       {
         $set: {
           idPartida: req.body.idPartida,
-          idTime: req.body.idTime, // atualiza os IDs dos times
+          idTime: req.body.idTime,
           time: req.body.time,
-          estatisticaJogador: req.body.estatisticaJogador, // atualiza a estatística dos jogadores
+          estatisticaJogador: req.body.estatisticaJogador,
         },
       },
       { new: true }
